@@ -1,7 +1,7 @@
 FROM python:3.6.5-jessie
 
 ENV PYTHONUNBUFFERED 1
-ENV SRC_DIR=/django_mydjangoapp
+ENV SRC_DIR=/app
 
 RUN mkdir -p $SRC_DIR
 
