@@ -2,7 +2,7 @@ version: '3'
 
 services:
 
-  web:
+  app:
     build:
       context: ./app
       dockerfile: Dockerfile
@@ -11,6 +11,9 @@ services:
       - staticfiles:/app/staticfiles
     ports:
       - 8000
+    deploy:
+      mode: replicated
+      replicas: 2
     depends_on:
       db:
         condition: service_healthy
@@ -24,7 +27,7 @@ services:
     volumes:
       - staticfiles:/staticfiles
     depends_on:
-      - web
+      - app
 
   db:
     image: mysql:8.0
