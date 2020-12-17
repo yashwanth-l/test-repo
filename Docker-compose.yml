@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+
+  web:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    command: bash -c "python manage.py collectstatic --no-input &amp;&amp; python manage.py migrate &amp;&amp; gunicorn --bind 0.0.0.0:8000 -w 4 mydjangoapp.wsgi"
+    volumes:
+      - staticfiles:/app/staticfiles
+    ports:
+      - 8000
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - 9090:80
+    volumes:
+      - staticfiles:/staticfiles
+    depends_on:
+      - web
+
+  db:
+    image: mysql:8.0
+    ports:
+      - 3306
+    environment:
+      MYSQL_ROOT_PASSWORD: mydjangoapp
+      MYSQL_USER: mydjangoapp
+      MYSQL_PASSWORD: mydjangoapp
+      MYSQL_DATABASE: mydjangoapp
+    healthcheck:
+      test: ["CMD", "mysqladmin", "-u$MYSQL_USER", "-p$MYSQL_PASSWORD",  "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    restart: always
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
+  staticfiles:
